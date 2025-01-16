@@ -1,7 +1,8 @@
-from wsgiref.validate import header_re
-from xmlrpc.client import Binary
+
 
 from abc import ABC, abstractmethod
+
+
 
 class DSA:
     class Stack:
@@ -25,7 +26,6 @@ class DSA:
 
         def top(self):
             return print(self._list[self.tail])
-
     class Queue:
         def __init__(self):
             self._list = [None] * 10
@@ -57,8 +57,6 @@ class DSA:
                 self._list[i] = old[walk]
                 walk = (walk + 1) % len(self._list)
             self.front = 0
-
-
     class LinkedList:
         class SingleListNode:
             def __init__(self):
@@ -189,8 +187,6 @@ class DSA:
                         print("prev->", temp.prev.val, end="")
                     print("val->", temp.val)
                     temp = temp.next
-
-
     class Tree(ABC):
         """Abstract base class representing a tree structure."""
 
@@ -249,7 +245,6 @@ class DSA:
         def is_empty(self):
             """Return True if the tree is empty."""
             return len(self) == 0
-
     class BinaryTree(Tree, ABC):
         """Abstract base class representing a binary tree structure."""
 
@@ -279,7 +274,6 @@ class DSA:
                 yield self.left(p)
             if self.right(p) is not None:
                 yield self.right(p)
-
     class LinkedBinaryTree(BinaryTree):
         """Linked representation of a binary tree structure."""
 
@@ -448,7 +442,243 @@ class DSA:
                 node._right = t2._root
                 t2._root = None  # set t2 instance to empty
                 t2._size = 0
+    class PriorityQueue:
+        class Node:
+            def __init__(self, data, priority):
+                self.data = data
+                self.priority = property
+                self.next = None
 
+
+        def __init__(self):
+            self.head = None
+
+        def push(self,data, priority):
+            new_node = self.Node(data, priority)
+            if self.head is not None or self.head.priority > priority:
+                new_node.next = self.head
+                self.head = new_node
+            else:
+                current = self.head
+                while current.next and current.next.priority <= priority:
+                    current = current.next
+                new_node.next = current.next
+                current.next = new_node
+
+        def pop(self):
+            if self.is_empty():
+                raise IndexError("pop from an empty priority queue")
+
+            temp = self.head
+            self.head = self.head.next
+            return temp.data
+
+        def peek(self):
+            if self.is_empty():
+                raise IndexError("peek from an empty priority queue")
+            return   self.head.data
+
+        def is_empty(self):
+            return self.head  is None
+
+        def size(self):
+            count = 1
+            current= self.head
+
+            while current:
+                count +=1
+                current = current.next
+            return count
+    class Empty(Exception):
+        """custom exception to indicate an empty priority queue"""
+        pass
+
+
+    # Base Priority Queue Abstract Class
+    class PriorityQueueBase(ABC):
+        class Item:
+            def __init__(self, key, value):
+                self.key = key
+                self.value = value
+
+            def __lt__(self, other):
+                return self.key < other.key
+
+        @abstractmethod
+        def add(self, key, value):
+            pass
+
+        @abstractmethod
+        def min(self):
+            pass
+
+        @abstractmethod
+        def remove_min(self):
+            pass
+
+        @abstractmethod
+        def __len__(self):
+            pass
+
+    # Base Heap Implementation
+    class HeapBase:
+        """Base class for MinHeap and MaxHeap."""
+
+        def __init__(self, elements=None):
+            """Initialize the heap. If elements are provided, build the heap bottom-up."""
+            self._data = elements if elements else []
+            if elements:
+                self._heapify()
+
+        def __len__(self):
+            return len(self._data)
+
+        def is_empty(self):
+            return len(self._data) == 0
+
+        def _parent(self, index):
+            return (index - 1) // 2
+
+        def _left(self, index):
+            return 2 * index + 1
+
+        def _right(self, index):
+            return 2 * index + 2
+
+        def _swap(self, i, j):
+            self._data[i], self._data[j] = self._data[j], self._data[i]
+
+        def _sift_down(self, index):
+            raise NotImplementedError("This method must be implemented by subclasses.")
+
+        def _sift_up(self, index):
+            raise NotImplementedError("This method must be implemented by subclasses.")
+
+        def _heapify(self):
+            start = self._parent(len(self._data) - 1)
+            for i in range(start, -1, -1):
+                self._sift_down(i)
+
+        def add(self, value):
+            self._data.append(value)
+            self._sift_up(len(self._data) - 1)
+
+        def remove(self):
+            if self.is_empty():
+                raise ValueError("Heap is empty.")
+            self._swap(0, len(self._data) - 1)
+            value = self._data.pop()
+            if not self.is_empty():
+                self._sift_down(0)
+            return value
+
+        def peek(self):
+            if self.is_empty():
+                raise ValueError("Heap is empty.")
+            return self._data[0]
+
+    # MinHeap Implementation
+    class MinHeap(HeapBase):
+        def _sift_down(self, index):
+            smallest = index
+            left = self._left(index)
+            right = self._right(index)
+
+            if left < len(self._data) and self._data[left] < self._data[smallest]:
+                smallest = left
+            if right < len(self._data) and self._data[right] < self._data[smallest]:
+                smallest = right
+
+            if smallest != index:
+                self._swap(index, smallest)
+                self._sift_down(smallest)
+
+        def _sift_up(self, index):
+            while index > 0:
+                parent = self._parent(index)
+                if self._data[index] < self._data[parent]:
+                    self._swap(index, parent)
+                    index = parent
+                else:
+                    break
+
+    # MaxHeap Implementation
+    class MaxHeap(HeapBase):
+        def _sift_down(self, index):
+            largest = index
+            left = self._left(index)
+            right = self._right(index)
+
+            if left < len(self._data) and self._data[left] > self._data[largest]:
+                largest = left
+            if right < len(self._data) and self._data[right] > self._data[largest]:
+                largest = right
+
+            if largest != index:
+                self._swap(index, largest)
+                self._sift_down(largest)
+
+        def _sift_up(self, index):
+            while index > 0:
+                parent = self._parent(index)
+                if self._data[index] > self._data[parent]:
+                    self._swap(index, parent)
+                    index = parent
+                else:
+                    break
+
+    # Priority Queue Using MinHeap
+    class HeapPriorityQueue(PriorityQueueBase):
+        """A Priority Queue implemented using a MinHeap."""
+
+        def __init__(self):
+            self._heap = self.MinHeap()
+
+        def add(self, key, value):
+            self._heap.add(self.Item(key, value))
+
+        def min(self):
+            if self._heap.is_empty():
+                raise ValueError("Priority queue is empty.")
+            item = self._heap.peek()
+            return (item.key, item.value)
+
+        def remove_min(self):
+            if self._heap.is_empty():
+                raise ValueError("Priority queue is empty.")
+            item = self._heap.remove()
+            return (item.key, item.value)
+
+        def __len__(self):
+            return len(self._heap)
+
+    # Test Code
+    if __name__ == "__main__":
+        print("Testing MinHeap:")
+        min_heap = MinHeap([5, 3, 8, 1, 9, 2])
+        print("MinHeap (Bottom-Up Construction):", min_heap._data)
+        min_heap.add(0)
+        print("After adding 0:", min_heap._data)
+        print("Removed:", min_heap.remove())
+        print("After removal:", min_heap._data)
+
+        print("\nTesting MaxHeap:")
+        max_heap = MaxHeap([5, 3, 8, 1, 9, 2])
+        print("MaxHeap (Bottom-Up Construction):", max_heap._data)
+        max_heap.add(10)
+        print("After adding 10:", max_heap._data)
+        print("Removed:", max_heap.remove())
+        print("After removal:", max_heap._data)
+
+        print("\nTesting PriorityQueue:")
+        pq = HeapPriorityQueue()
+        pq.add(4, "Task A")
+        pq.add(2, "Task B")
+        pq.add(5, "Task C")
+        pq.add(1, "Task D")
+        print("Minimum element:", pq.min())
+        print("Removed minimum:", pq.remove_min())
+        print("Minimum element after removal:", pq.min())
 
 
 # Create an instance of LinkedBinaryTree
@@ -512,15 +742,11 @@ t2_root = t2.add_root("K")
 t2.add_left(t2_root, "L")
 t2.add_right(t2_root, "M")
 
-# Remove children of right_child (C) to make it a leaf node
-tree.delete(tree.left(right_child))  # Delete F
-tree.delete(tree.right(right_child))  # Delete G
-
-# Now, right_child (C) is a leaf node, so you can attach t1 and t2
+# Attach t1 and t2 to the right child of the root (C)
 tree.attach(right_child, t1, t2)
 
 # Check the size of the tree after attachment
-print("Size of the tree after attachment:", len(tree))  # Output: Size of the tree after attachment: 9
+print("Size of the tree after attachment:", len(tree))  # Output: Size of the tree after attachment: 11
 
 # Print the tree structure using a traversal
 def print_tree(tree, p):
@@ -530,19 +756,6 @@ def print_tree(tree, p):
 
 print("Tree structure:")
 print_tree(tree, tree.root())
-
-# Output:
-# Tree structure:
-# A
-# B
-# E
-# C
-# H
-# I
-# J
-# K
-# L
-# M
 
 # Output:
 # Tree structure:
